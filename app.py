@@ -5,6 +5,12 @@ from flask import Flask, request, jsonify  # Importamos Flask para criar a API e
 # O Flask precisa saber qual é o arquivo principal do programa, então passamos "__name__" como referência
 app = Flask(__name__)
 
+@app.route("/")
+def home():
+    # Quando o usuário acessar essa rota no navegador, ele verá essa mensagem HTML na tela
+    # Essa mensagem será exibida como um cabeçalho de segundo nível (<h2>)
+    return "<h2>Bem-vindo à API Livros Vai Na Web!</h2>"
+
 # Função para inicializar o banco de dados SQLite
 # Ela cria o banco de dados caso ele ainda não exista
 
@@ -52,7 +58,7 @@ def doar():
     with sqlite3.connect("database.db") as conn:
         # Inserimos os dados do novo livro na tabela "LIVROS"
         conn.execute(f"""
-        INSERT INTO LIVROS (titulo, categoria, autor, imagem_url) 
+        INSERT INTO LIVROS (titulo, categoria, autor, image_url) 
         VALUES ("{titulo}", "{categoria}", "{autor}", "{image_url}")
         """)
     
@@ -62,6 +68,25 @@ def doar():
     # `jsonify()` transforma um dicionário Python em JSON válido para a resposta HTTP
     # O código HTTP 201 indica que um novo recurso foi criado com sucesso
     return jsonify({"mensagem": "Livro cadastrado com sucesso"}), 201
+
+@app.route("/livros", methods=["GET"])
+def listar_livros():
+
+    with sqlite3.connect("database.db") as conn: 
+        livros=conn.execute("SELECT* FROM LIVROS").fetchall()
+
+        livros_formatados = []
+
+        for item in livros:
+            dicionario ={
+                "id": item[0], 
+                "titulo": item[1], 
+                "categoria": item[2], 
+                "autor": item[3], 
+                "image_url": item[4]
+                }
+            livros_formatados.append(dicionario)
+    return jsonify(livros_formatados), 200
 
 # Aqui verificamos se o script está sendo executado diretamente e não importado como módulo
 if __name__ == "__main__":
