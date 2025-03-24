@@ -62,7 +62,7 @@ def doar():
         VALUES ("{titulo}", "{categoria}", "{autor}", "{image_url}")
         """)
     
-    conn.commit()  # Confirma a inserção dos dados no banco de dados
+        conn.commit()  # Confirma a inserção dos dados no banco de dados
 
     # Retornamos uma mensagem confirmando que o livro foi cadastrado com sucesso
     # `jsonify()` transforma um dicionário Python em JSON válido para a resposta HTTP
