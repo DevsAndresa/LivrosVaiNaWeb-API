@@ -11,7 +11,7 @@ A API **Livros Vai Na Web** é um sistema simples para cadastro e listagem de li
 ## Instalação e Configuração
 ### 1. Clone o repositório
 ```bash
-git clone https://github.com/DevsAndresa/LivrosVainaWeb.git
+git clone https://github.com/DevsAndresa/LivrosVaiNaWeb-API
 ```
 ### 2. Acesse o diretório do projeto
 ```bash
