@@ -1,38 +1,47 @@
-import sqlite3  # Biblioteca para interagir com o banco de dados SQLite
-from flask import Flask, request, jsonify  # Importamos Flask para criar a API e request/jsonify para manipular requisições e respostas
+# Importamos a biblioteca sqlite3, que permite criar e manipular um banco de dados local no formato SQLite
+import sqlite3  
+
+# Importamos o Flask (para criar a API), o request (para acessar os dados enviados pelo usuário)
+# e o jsonify (para retornar os dados em formato JSON)
+from flask import Flask, request, jsonify  
+from flask_cors import CORS
 
 # Criamos a aplicação Flask
-# O Flask precisa saber qual é o arquivo principal do programa, então passamos "__name__" como referência
+# "__name__" indica que este é o arquivo principal do projeto
 app = Flask(__name__)
+CORS(app)
 
 
+# CORS - Cross Origin Resource Sharing (Compartilhamento de Recursos entre origens diferentes)
+
+
+# 🔹 Criamos uma rota principal "/" que será a página inicial da API
+# Quando acessarmos http://127.0.0.1:5000/ no navegador, essa função será executada
 @app.route("/")
-def mensagem_inicial():
-    # Quando o usuário acessar essa rota no navegador, ele verá essa mensagem HTML na tela
-    # Essa mensagem será exibida como um cabeçalho de segundo nível (<h2>)
+def mensagem_Inicial():
+    # Esta função retorna uma frase engraçada formatada em HTML, usando a tag <h2>
     return "<h2>Seja Bem Vindo!</h2>"
 
-# Função para inicializar o banco de dados SQLite
-# Ela cria o banco de dados caso ele ainda não exista e garante que a estrutura esteja configurada corretamente
-
+# 🔹 Criamos uma função chamada init_db() para inicializar o banco de dados
+# Ela cria a tabela "LIVROS" caso ainda não exista, garantindo que o sistema esteja pronto para uso
 def init_db():
-    # Abrimos uma conexão com o banco de dados "database.db"
-    # O comando "with" garante que a conexão será fechada automaticamente após a execução
+    # Abrimos uma conexão com o arquivo "database.db" (cria o arquivo caso ele ainda não exista)
+    # O "with" garante que a conexão será encerrada de forma segura após o uso
     with sqlite3.connect("database.db") as conn:
-        # Criamos uma tabela chamada "LIVROS", caso ela ainda não exista
+        # Executamos o comando SQL que cria a tabela LIVROS com os campos necessários
         conn.execute(
             """
                 CREATE TABLE IF NOT EXISTS LIVROS(
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    titulo TEXT NOT NULL, 
-                    categoria TEXT NOT NULL,  
-                    autor TEXT NOT NULL, 
-                    image_url TEXT NOT NULL 
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,  -- ID gerado automaticamente para cada livro
+                    titulo TEXT NOT NULL,                 -- Título do livro (campo obrigatório)
+                    categoria TEXT NOT NULL,              -- Categoria do livro (campo obrigatório)
+                    autor TEXT NOT NULL,                  -- Nome do autor (campo obrigatório)
+                    image_url TEXT NOT NULL               -- Link da imagem do livro (campo obrigatório)
                 )
             """
-        )  # Esse comando SQL cria a tabela "LIVROS" caso ela ainda não exista, garantindo que nossa aplicação funcione corretamente
+        )  # O comando acima garante que a estrutura do banco estará pronta para uso
 
-# Chamamos a função para garantir que o banco de dados esteja pronto antes de rodar a aplicação
+# Chamamos a função init_db() para garantir que o banco esteja criado ao iniciar o servidor
 init_db()
 
 # 🔹 Criamos a rota "/doar" para permitir que um novo livro seja cadastrado via método POST
