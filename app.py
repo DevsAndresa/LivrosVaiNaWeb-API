@@ -105,17 +105,27 @@ def listar_livros():
 @app.route('/livros/<int:id>', methods=['PUT'])
 def substituir_livro(id):
     dados = request.get_json()
-    for livro in livros:
-        if livro["id"] == id:
-            livro.update(dados)
-            return jsonify(livro), 200
-    return jsonify({"erro": "Livro não encontrado"}), 404
+    
+    with sqlite3.connect("database.db") as conn:
+        cursor = conn.cursor()
 
-@app.route('/livros/<int:id>', methods=['DELETE'])
-def deletar_livro(id):
-    global livros
-    livros = [livro for livro in livros if livro["id"] != id]
-    return jsonify({"mensagem": "Livro deletado"}), 200
+        # Verifica se o livro existe
+        cursor.execute("SELECT * FROM LIVROS WHERE id = ?", (id,))
+        livro = cursor.fetchone()
+        
+        if not livro:
+            return jsonify({"erro": "Livro não encontrado"}), 404
+
+        # Atualiza os dados
+        cursor.execute("""
+            UPDATE LIVROS 
+            SET titulo = ?, categoria = ?, autor = ?, image_url = ?
+            WHERE id = ?
+        """, (dados["titulo"], dados["categoria"], dados["autor"], dados["image_url"], id))
+
+        conn.commit()
+
+    return jsonify({"mensagem": "Livro atualizado com sucesso"}), 200
 
 
 # 🔹 Verificamos se este arquivo está sendo executado diretamente
