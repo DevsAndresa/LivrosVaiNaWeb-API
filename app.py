@@ -19,7 +19,7 @@ CORS(app)
 # Quando acessarmos http://127.0.0.1:5000/ no navegador, essa função será executada
 @app.route("/")
 def manda_o_pix():
-    # Esta função retorna uma frase engraçada formatada em HTML, usando a tag <h2>
+    # Esta função retorna uma frase formatada em HTML, usando a tag <h2>
     return "<h2>Bem Vindo!</h2>"
 
 # 🔹 Criamos uma função chamada init_db() para inicializar o banco de dados
@@ -32,11 +32,11 @@ def init_db():
         conn.execute(
             """
                 CREATE TABLE IF NOT EXISTS LIVROS(
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,  -- ID gerado automaticamente para cada livro
-                    titulo TEXT NOT NULL,                 -- Título do livro (campo obrigatório)
-                    categoria TEXT NOT NULL,              -- Categoria do livro (campo obrigatório)
-                    autor TEXT NOT NULL,                  -- Nome do autor (campo obrigatório)
-                    image_url TEXT NOT NULL               -- Link da imagem do livro (campo obrigatório)
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,  
+                    titulo TEXT NOT NULL,                 
+                    categoria TEXT NOT NULL,              
+                    autor TEXT NOT NULL,                  
+                    image_url TEXT NOT NULL               
                 )
             """
         )  # O comando acima garante que a estrutura do banco estará pronta para uso
@@ -101,6 +101,22 @@ def listar_livros():
 
     # Retornamos todos os livros em formato JSON com status 200 (OK)
     return jsonify(livros_formatados)
+
+@app.route('/livros/<int:id>', methods=['PUT'])
+def substituir_livro(id):
+    dados = request.get_json()
+    for livro in livros:
+        if livro["id"] == id:
+            livro.update(dados)
+            return jsonify(livro), 200
+    return jsonify({"erro": "Livro não encontrado"}), 404
+
+@app.route('/livros/<int:id>', methods=['DELETE'])
+def deletar_livro(id):
+    global livros
+    livros = [livro for livro in livros if livro["id"] != id]
+    return jsonify({"mensagem": "Livro deletado"}), 200
+
 
 # 🔹 Verificamos se este arquivo está sendo executado diretamente
 # Isso evita que o servidor Flask rode se o arquivo for apenas importado
