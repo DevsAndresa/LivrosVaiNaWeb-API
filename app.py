@@ -35,45 +35,67 @@ def init_db():
 # Chamamos a função para garantir que o banco de dados esteja pronto antes de rodar a aplicação
 init_db()
 
-# Criamos uma rota que recebe dados de um novo livro e os armazena no banco de dados
+# 🔹 Criamos a rota "/doar" para permitir que um novo livro seja cadastrado via método POST
 @app.route("/doar", methods=["POST"])
 def doar():
-    # Capturamos os dados enviados pelo usuário na requisição HTTP
-    # Esses dados devem estar no formato JSON e contêm informações do livro que será cadastrado
+    # Pegamos os dados enviados pelo cliente no formato JSON e exibimos no terminal para fins de teste
     dados = request.get_json()
-    print(f" AQUI ESTÃO OS DADOS RETORNADOS DO CLIENTE {dados}")  # Exibe os dados no terminal para conferência
+    print(f" AQUI ESTÃO OS DADOS RETORNADOS DO CLIENTE {dados}")
 
-    # Extraímos as informações do JSON recebido
-    # O método .get() obtém o valor associado a cada chave no dicionário JSON
-    titulo = dados.get("titulo")  # Obtém o título do livro enviado pelo usuário
-    categoria = dados.get("categoria")  # Obtém a categoria do livro
-    autor = dados.get("autor")  # Obtém o nome do autor do livro
-    image_url = dados.get("image_url")  # Obtém a URL da imagem do livro
+    # Extraímos cada campo do JSON enviado
+    titulo = dados.get("titulo")
+    categoria = dados.get("categoria")
+    autor = dados.get("autor")
+    image_url = dados.get("image_url")
 
-    # Verificamos se todos os campos obrigatórios foram preenchidos
-    # Se algum campo estiver vazio, retornamos um erro 400 (Bad Request), informando ao usuário que os campos são obrigatórios
+    # Verificamos se algum dos campos obrigatórios está vazio
     if not titulo or not categoria or not autor or not image_url:
-        return jsonify({"erro": "Todos os campos são obrigatórios"}), 400  
-    
-    # Conectamos ao banco de dados SQLite
-    # O comando "with" garante que a conexão será fechada corretamente após a execução do bloco
+        # Se faltar algum dado, retornamos um erro 400 com uma mensagem explicando o problema
+        return jsonify({"erro": "Todos os campos são obrigatórios"}), 400
+
+    # Conectamos ao banco de dados usando a variável conn
     with sqlite3.connect("database.db") as conn:
-        # Inserimos os dados do novo livro na tabela "LIVROS"
-        # Essa query SQL adiciona os valores de título, categoria, autor e imagem_url na tabela
+        # Executamos um comando SQL para inserir os dados na tabela LIVROS
         conn.execute(f"""
-        INSERT INTO LIVROS (titulo, categoria, autor, image_url) 
-        VALUES ("{titulo}", "{categoria}", "{autor}", "{image_url}")
-        """)  # Essa operação insere os dados diretamente no banco de dados
-    
-    conn.commit()  # Confirma a inserção dos dados no banco de dados para que eles sejam armazenados permanentemente
+                    INSERT INTO LIVROS (titulo,categoria,autor,image_url)
+                    VALUES ("{titulo}", "{categoria}", "{autor}", "{image_url}")
+        """)
 
-    # Retornamos uma resposta em formato JSON confirmando que o livro foi cadastrado com sucesso
-    # `jsonify()` transforma um dicionário Python em JSON válido para ser retornado na resposta HTTP
-    # O código HTTP 201 indica que um novo recurso (livro) foi criado com sucesso
-    return jsonify({"mensagem": "Livro cadastrado com sucesso"}), 201
+        # Salvamos as mudanças com commit()
+        conn.commit()
 
-# Aqui verificamos se o script está sendo executado diretamente e não importado como módulo
+        # Retornamos uma mensagem confirmando o cadastro com status 201 (Created)
+        return jsonify({"mensagem": "Livro cadastrado com sucesso"}), 201
+
+# 🔹 Criamos a rota "/livros" para listar todos os livros cadastrados no banco
+@app.route("/livros", methods=["GET"])
+def listar_livros():
+    # Conectamos ao banco de dados
+    with sqlite3.connect("database.db") as conn:
+        # Buscamos todos os registros da tabela LIVROS
+        livros = conn.execute("SELECT * FROM LIVROS").fetchall()
+
+        # Criamos uma lista vazia para armazenar os livros formatados
+        livros_formatados = []
+
+        # Para cada livro encontrado, transformamos os dados em um dicionário
+        for item in livros:
+            dicionario_livros = {
+                "id": item[0],            # ID do livro
+                "titulo": item[1],        # Título
+                "categoria": item[2],     # Categoria
+                "autor": item[3],         # Autor
+                "image_url": item[4]      # URL da imagem
+            }
+            # Adicionamos o dicionário à lista
+            livros_formatados.append(dicionario_livros)
+
+    # Retornamos todos os livros em formato JSON com status 200 (OK)
+    return jsonify(livros_formatados)
+
+# 🔹 Verificamos se este arquivo está sendo executado diretamente
+# Isso evita que o servidor Flask rode se o arquivo for apenas importado
 if __name__ == "__main__":
-    # Inicia o servidor Flask no modo de depuração
-    # O modo debug permite que qualquer alteração no código seja aplicada automaticamente sem precisar reiniciar o servidor
+    # Iniciamos o servidor Flask em modo debug
+    # O modo debug mostra erros detalhados e recarrega o servidor automaticamente ao salvar o arquivo
     app.run(debug=True)
