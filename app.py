@@ -1,23 +1,20 @@
-# Importamos a biblioteca sqlite3, que permite criar e manipular um banco de dados local no formato SQLite
 import sqlite3  
 
-# Importamos o Flask (para criar a API), o request (para acessar os dados enviados pelo usuário)
-# e o jsonify (para retornar os dados em formato JSON)
+
 from flask import Flask, request, jsonify  
 from flask_cors import CORS
 
-# Criamos a aplicação Flask
-# "__name__" indica que este é o arquivo principal do projeto
+
 app = Flask(__name__)
 CORS(app)
 
 
-# CORS - Cross Origin Resource Sharing (Compartilhamento de Recursos entre origens diferentes)
+
 
 
 @app.route("/")
-def manda_o_pix():
-    # Esta função retorna uma frase engraçada formatada em HTML, usando a tag <h2>
+def mensagem_inicial():
+    # Esta função retorna uma formatada em HTML, usando a tag <h2>
     return "<h2>Seja Bem Vindo!</h2>"
 
 # 🔹 Criamos uma função chamada init_db() para inicializar o banco de dados
@@ -37,7 +34,7 @@ def init_db():
                     image_url TEXT NOT NULL               
                 )
             """
-        )  # O comando acima garante que a estrutura do banco estará pronta para uso
+        )  
 
 # Chamamos a função init_db() para garantir que o banco esteja criado ao iniciar o servidor
 init_db()
